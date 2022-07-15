@@ -1,4 +1,6 @@
-package com.nu.poc.service.impl;
+package com.nu.poc.ado.service.impl;
+
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,21 +12,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nu.poc.ado.model.BookTicket;
 import com.nu.poc.ado.model.TicketData;
 import com.nu.poc.ado.repo.BookTicketRepo;
-import com.nu.poc.service.BookTicketService;
-import com.nu.poc.util.UtilityService;
+import com.nu.poc.ado.service.BookTicketService;
+import com.nu.poc.ado.util.UtilityService;
 
+@Service
 public class BookTicketServiceImpl implements BookTicketService{
 
 	private static final Logger LOG = LoggerFactory.getLogger(BookTicketServiceImpl.class);
 	@Autowired
 	private BookTicketRepo bookTicketRepo;
 	UtilityService utilityService = new UtilityService();
-	private final ObjectMapper mapper;
-	
-	@Autowired
-	public BookTicketServiceImpl(ObjectMapper mapper) {
-		this.mapper = mapper;
-	}
 	
 	@Override
 	public TicketData getBookTicket(BookTicket bookTicket) throws JsonParseException {
@@ -44,6 +41,12 @@ public class BookTicketServiceImpl implements BookTicketService{
 				.build();
 		LOG.info("Ticket Booked");
 		return ticketData;
+	}
+
+	@Override
+	public List<BookTicket> getTicket() {
+		LOG.info("Get All ticket..");
+		return bookTicketRepo.findAll();
 	}
 
 }

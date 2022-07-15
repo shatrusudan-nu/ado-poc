@@ -2,6 +2,8 @@ package com.nu.poc.ado.controller;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,10 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.nu.poc.ado.model.BookTicket;
 import com.nu.poc.ado.model.Passenger;
 import com.nu.poc.ado.model.TicketData;
-import com.nu.poc.ado.repo.BookTicketRepo;
 import com.nu.poc.ado.repo.PassengerRepo;
-import com.nu.poc.service.BookTicketService;
-import com.nu.poc.util.UtilityService;
+import com.nu.poc.ado.service.BookTicketService;
 
 @RestController
 public class BookTicketController {
@@ -24,8 +24,8 @@ public class BookTicketController {
 	@Autowired
 	private PassengerRepo passengerRepo;
 	@Autowired
-	private BookTicketRepo bookTicketRepo;
-	UtilityService utilityService = new UtilityService();
+	private BookTicketService bookTicketService;
+	private static final Logger LOG = LoggerFactory.getLogger(BookTicketController.class);
 	
 	
 	@GetMapping(value = "/")
@@ -36,7 +36,7 @@ public class BookTicketController {
 	@GetMapping(value = "/passengers")
 	public List<Passenger> getPassenger() {
 		Passenger p = passengerRepo.findByEmailId("sudan@gmail.com").get(0);
-		System.out.println("Passenger First Name data:"+ p.getFirstName());
+		LOG.info("Passenger First Name data:"+ p.getFirstName());
 		return passengerRepo.findAll();
 	}
 	
@@ -48,25 +48,13 @@ public class BookTicketController {
 	
 	@GetMapping(value = "/ticket")
 	public List<BookTicket> getTicket() {
-		return bookTicketRepo.findAll();
+		return bookTicketService.getTicket();
 	}
 	
 	@PostMapping(value = "/bookTicket")
 	public ResponseEntity<TicketData> saveBookTicket(@RequestBody BookTicket bookTicket) {
-		String bookingId = utilityService.generateBookingId(15);
-		bookTicket.setBookingId(bookingId);
-		bookTicketRepo.save(bookTicket);
-		BookTicket ticket = bookTicketRepo.findByBookingId(bookingId).get(0);
-		TicketData ticketData = TicketData.builder().bookingId(bookingId)
-				.travelDateTime(ticket.getTravel().getTravelDateTime())
-				.originName(ticket.getTravel().getOriginName())
-				.destinationName(ticket.getTravel().getDestinationName())
-				.seatNumber(ticket.getTravel().getSeatNumber())
-				.busBrand(ticket.getTravel().getBusBrand())
-				.totalTicketAmount(ticket.getTravel().getTicketAmount())
-				.emailId(ticket.getPassenger().getEmailId())
-				.message("Ticket Booked Successfully")
-				.build();
+		LOG.info("BookTicket Controller called");
+		TicketData ticketData = bookTicketService.getBookTicket(bookTicket);
 		return new ResponseEntity<>(ticketData, HttpStatus.OK);
 	}
 	

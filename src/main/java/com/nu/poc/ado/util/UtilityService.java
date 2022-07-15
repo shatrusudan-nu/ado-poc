@@ -1,4 +1,4 @@
-package com.nu.poc.util;
+package com.nu.poc.ado.util;
 
 import java.util.Random;
 
