@@ -11,5 +11,6 @@ public interface BookTicketService {
 
 	public TicketData getBookTicket(BookTicket bookTicket) throws JsonParseException;
 	public List<BookTicket> getTicket();
+	public void deleteAllTicket();
 	
 }

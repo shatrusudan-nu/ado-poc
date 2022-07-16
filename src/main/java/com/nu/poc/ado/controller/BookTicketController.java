@@ -58,4 +58,10 @@ public class BookTicketController {
 		return new ResponseEntity<>(ticketData, HttpStatus.OK);
 	}
 	
+	@GetMapping(value = "/deleteAllTicket")
+	public String deleteTicket() {
+		bookTicketService.deleteAllTicket();
+		return "All ticket Deleted";
+	}
+	
 }

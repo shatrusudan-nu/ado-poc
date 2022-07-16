@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.json.JsonParseException;
 import org.springframework.stereotype.Service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nu.poc.ado.model.BookTicket;
 import com.nu.poc.ado.model.TicketData;
 import com.nu.poc.ado.repo.BookTicketRepo;
@@ -47,6 +46,12 @@ public class BookTicketServiceImpl implements BookTicketService{
 	public List<BookTicket> getTicket() {
 		LOG.info("Get All ticket..");
 		return bookTicketRepo.findAll();
+	}
+	
+	@Override
+	public void deleteAllTicket() {
+		LOG.info("Delete All ticket..");
+		bookTicketRepo.deleteAll();
 	}
 
 }
