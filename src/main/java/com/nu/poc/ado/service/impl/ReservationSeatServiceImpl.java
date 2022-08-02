@@ -2,11 +2,16 @@ package com.nu.poc.ado.service.impl;
 
 import com.nu.poc.ado.model.DisponibilidadAsiento;
 import com.nu.poc.ado.model.Estructura;
+import com.nu.poc.ado.model.corrida.Contenido;
+import com.nu.poc.ado.model.corrida.Corrida;
+import com.nu.poc.ado.model.corrida.CorridasItems;
+import com.nu.poc.ado.repo.CorridasItemsRepo;
 import com.nu.poc.ado.repo.DisponibilidadAsientoRepo;
 import com.nu.poc.ado.service.ReservationSeatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -16,17 +21,20 @@ import java.util.stream.Collectors;
 public class ReservationSeatServiceImpl implements ReservationSeatService {
 
     @Autowired
-    private DisponibilidadAsientoRepo repo;
+    private DisponibilidadAsientoRepo disponibilidadAsientoRepo;
+
+    @Autowired
+    private CorridasItemsRepo CorridasRepo;
 
     public Optional<DisponibilidadAsiento> reserveSeatById(String id , Integer asiento) {
-        Optional<DisponibilidadAsiento> seat=repo.findAll().stream()
+        Optional<DisponibilidadAsiento> seat= disponibilidadAsientoRepo.findAll().stream()
                 .filter(disponibilidadAsiento -> disponibilidadAsiento.getId().equals(id)).findAny();
 
         seat.get().getContenido().setAsientosLibre(seat.get().getContenido().getAsientosLibre()-1);
         return this.setFlagToSeat(seat,"OC",asiento);
     }
     public Optional<DisponibilidadAsiento> releaseSeatById(String id ,Integer asiento) {
-        Optional<DisponibilidadAsiento> seat=repo.findAll().stream()
+        Optional<DisponibilidadAsiento> seat= disponibilidadAsientoRepo.findAll().stream()
                 .filter(disponibilidadAsiento -> disponibilidadAsiento.getId().equals(id)).findAny();
 
         seat.get().getContenido().setAsientosLibre(seat.get().getContenido().getAsientosLibre()+1);
@@ -58,9 +66,23 @@ public class ReservationSeatServiceImpl implements ReservationSeatService {
                 .collect(Collectors.toList()).size();
 
         disponibilidadAsientoResult.get().getContenido().setAsientosLibre(asientosLibre);
-        repo.save(disponibilidadAsientoResult.get());
+        disponibilidadAsientoRepo.save(disponibilidadAsientoResult.get());
+
+        saveCorridasSeatdisponibility(disponibilidadAsientoResult.get().getIdCorrida(),asientosLibre);
 
         return disponibilidadAsientoResult;
     }
 
+    private void saveCorridasSeatdisponibility(String idCorrida,Integer asientosLibre){
+
+        CorridasItems corridasItems=CorridasRepo.findAll().get(0);
+
+        corridasItems.getContenido().getSalida().getCorridas().stream().filter(corrida -> corrida.idCorrida.equals(idCorrida))
+                .findAny().get().setAsientosLibre(asientosLibre);
+
+        List<Corrida> CorridasRegreso= new ArrayList<>();
+        corridasItems.getContenido().setRegreso(CorridasRegreso);
+
+        CorridasRepo.save(corridasItems);
+    }
 }
